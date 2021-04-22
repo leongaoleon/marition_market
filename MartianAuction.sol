@@ -6,6 +6,7 @@ contract MartianAuction {
     // Current state of the auction.
     address public highestBidder;
     uint public highestBid;
+    uint public balance;
 
     // Allowed withdrawals of previous bids
     mapping(address => uint) pendingReturns;
@@ -62,6 +63,7 @@ contract MartianAuction {
     /// Withdraw a bid that was overbid.
     function withdraw() public returns (bool) {
         uint amount = pendingReturns[msg.sender];
+        
         if (amount > 0) {
             // It is important to set this to zero because the recipient
             // can call this function again as part of the receiving call
@@ -83,7 +85,7 @@ contract MartianAuction {
 
     /// End the auction and send the highest bid
     /// to the beneficiary.
-    function auctionEnd() public {
+    function auctionEnd(address payable sender) public {
         // It is a good guideline to structure functions that interact
         // with other contracts (i.e. they call functions or send Ether)
         // into three phases:
@@ -99,7 +101,7 @@ contract MartianAuction {
 
         // 1. Conditions
         require(!ended, "auctionEnd has already been called.");
-        require(msg.sender == beneficiary, "You are not the auction beneficiary");
+        require(sender == beneficiary, "You are not the auction beneficiary");
 
         // 2. Effects
         ended = true;
